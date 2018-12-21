@@ -29,6 +29,7 @@ jobs:
     script: "./gradlew lintRelease"
   - name: Unit Tests
     script: "./gradlew testReleaseUnitTest"
+    after_failure: cat file:///home/travis/build/airbnb/MvRx/testing/build/reports/tests/testReleaseUnitTest/index.html
 
 sudo: false
 

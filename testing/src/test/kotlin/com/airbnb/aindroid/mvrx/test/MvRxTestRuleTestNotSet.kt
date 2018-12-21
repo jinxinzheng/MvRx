@@ -19,7 +19,7 @@ class MvRxTestRuleTestNotSet {
         TestRuleViewModel()
     }
 
-    @Test(expected = OnErrorNotImplementedException::class)
+    @Test(expected = CompositeException::class)
     fun testDebugNoOverride() {
         TestRuleViewModel(true)
     }

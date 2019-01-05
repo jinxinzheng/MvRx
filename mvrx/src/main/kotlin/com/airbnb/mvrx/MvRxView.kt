@@ -134,4 +134,21 @@ interface MvRxView : MvRxViewModelStoreOwner, LifecycleOwner {
         uniqueOnly: Boolean = false,
         subscriber: (A, B, C, D) -> Unit
     ) = selectSubscribe(this@MvRxView, prop1, prop2, prop3, prop4, uniqueOnly, subscriber)
+
+    /**
+     * Get map of state changes for subscription.
+     * Compared to the [selectSubscribe] methods, this allows more complex mapping of state from calling site.
+     *
+     * Example usages:
+     *
+     * mapState { prop1 }.subscribe { prop1 -> ... }
+     *
+     * mapState { prop1 to prop2 }.subscribe { (prop1, prop2) -> ... }
+     *
+     * @return [MvRxSubscriber] that can be used for subsequent subscribe.
+     */
+    fun <S : MvRxState, T> BaseMvRxViewModel<S>.mapState(
+        uniqueOnly: Boolean = false,
+        mapper: S.() -> T
+    ) = mapState(this@MvRxView, uniqueOnly, mapper)
 }

@@ -23,6 +23,9 @@ class ViewSubscriberFragment : BaseMvRxFragment() {
     var selectSubscribeUniqueOnlyValue = -1
     var selectSubscribeUniqueOnlyCallCount = 0
 
+    var mapStateSubscribeCallCount = 0
+    var mapStateSubscribeValue = 0
+
     var invalidateCallCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +40,10 @@ class ViewSubscriberFragment : BaseMvRxFragment() {
         viewModel.selectSubscribe(ViewSubscriberState::foo, uniqueOnly = true) {
             selectSubscribeUniqueOnlyValue = it
             selectSubscribeUniqueOnlyCallCount++
+        }
+        viewModel.mapState { foo * foo }.subscribe {
+            mapStateSubscribeValue = it
+            mapStateSubscribeCallCount++
         }
     }
 
@@ -89,6 +96,19 @@ class ViewSubscriberTest : BaseTest() {
         assertEquals(0, fragment.selectSubscribeUniqueOnlyValue)
         fragment.setFoo(1)
         assertEquals(1, fragment.selectSubscribeUniqueOnlyValue)
+    }
+
+    @Test
+    fun testMapStateSubscribe() {
+        val (_, fragment) = createFragment<ViewSubscriberFragment, TestActivity>()
+        assertEquals(1, fragment.mapStateSubscribeCallCount)
+        assertEquals(0, fragment.mapStateSubscribeValue)
+        fragment.setFoo(0)
+        assertEquals(1, fragment.mapStateSubscribeCallCount)
+        assertEquals(0, fragment.mapStateSubscribeValue)
+        fragment.setFoo(2)
+        assertEquals(2, fragment.mapStateSubscribeCallCount)
+        assertEquals(4, fragment.mapStateSubscribeValue)
     }
 
     @Test

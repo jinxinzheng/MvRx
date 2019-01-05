@@ -479,6 +479,35 @@ abstract class BaseMvRxViewModel<S : MvRxState>(
             .distinctUntilChanged()
             .subscribeLifecycle(owner, uniqueOnly) { (a, b, c, d, e, f, g) -> subscriber(a, b, c, d, e, f, g) }
 
+    /**
+     * Get map of state changes for subscription.
+     */
+    protected fun <T> mapState(mapper: S.() -> T) = mapStateInternal(null, false, mapper)
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY)
+    fun <T> mapState(
+        owner: LifecycleOwner,
+        uniqueOnly: Boolean = false,
+        mapper: S.() -> T
+    ) = mapStateInternal(owner, uniqueOnly, mapper)
+
+    private fun <T> mapStateInternal(
+        owner: LifecycleOwner?,
+        uniqueOnly: Boolean,
+        mapper: S.() -> T
+    ): MvRxSubscriber<T> = object : MvRxSubscriber<T> {
+        override fun subscribe(subscriber: (T) -> Unit) {
+            stateStore.observable
+                .map {
+                    // RxJava 2 does not allow nulls so we wrap the mapped value (might be null)
+                    // in a MvRxTuple1.
+                    MvRxTuple1(it.mapper())
+                }
+                .distinctUntilChanged()
+                .subscribeLifecycle(owner, uniqueOnly) { (it) -> subscriber(it) }
+        }
+    }
+
     private fun <T> Observable<T>.subscribeLifecycle(
         lifecycleOwner: LifecycleOwner? = null,
         uniqueOnly: Boolean,

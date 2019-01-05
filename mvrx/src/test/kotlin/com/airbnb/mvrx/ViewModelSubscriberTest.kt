@@ -18,7 +18,8 @@ data class ViewModelTestState(
         val list: List<Int> = emptyList(),
         val async: Async<String> = Uninitialized,
         val prop6: Int = 0,
-        val prop7: Int = 0
+        val prop7: Int = 0,
+        val str: String? = null
 ) : MvRxState
 
 class ViewModelTestViewModel(initialState: ViewModelTestState) : TestMvRxViewModel<ViewModelTestState>(initialState) {
@@ -687,5 +688,40 @@ class ViewModelSubscriberTest : BaseTest() {
         viewModel.set { copy() }
         assertEquals(1, callCount)
 
+    }
+
+    @Test
+    fun testMapState() {
+        var fooValue = 0
+        var barValue = 0
+        viewModel
+            .mapState(owner) { foo to bar }
+            .subscribe { (foo, bar) ->
+                fooValue = foo
+                barValue = bar
+            }
+
+        viewModel.set { copy(foo = 1, bar = 2) }
+        assertEquals(1, fooValue)
+        assertEquals(2, barValue)
+
+        viewModel.setFoo(3)
+        assertEquals(3, fooValue)
+
+        viewModel.setBar(4)
+        assertEquals(4, barValue)
+    }
+
+    @Test
+    fun testNullableMapState() {
+        var strValue: String? = null
+        viewModel
+            .mapState(owner) { str }
+            .subscribe { strValue = it }
+
+        assertEquals(null, strValue)
+
+        viewModel.set { copy(str = "abc") }
+        assertEquals("abc", strValue)
     }
 }
